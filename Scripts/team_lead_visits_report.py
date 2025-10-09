@@ -97,12 +97,18 @@ def compute_team_lead_sums(
 
 def write_team_lead_csv(rows: List[Dict[str, int]], output_csv_path: str) -> None:
     os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
-    headers = ["Date"] + LEAD_ORDER
+    headers = ["Date"] + LEAD_ORDER + ["Total"]
     with open(output_csv_path, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
         for r in rows:
-            writer.writerow({k: r.get(k, 0) if k != "Date" else r.get("Date", "") for k in headers})
+            lead_values = [int(r.get(lead, 0) or 0) for lead in LEAD_ORDER]
+            total_value = sum(lead_values)
+            row_out = {"Date": r.get("Date", "")}
+            for lead, value in zip(LEAD_ORDER, lead_values):
+                row_out[lead] = value
+            row_out["Total"] = total_value
+            writer.writerow(row_out)
 
 
 def write_team_lead_xlsx(rows: List[Dict[str, int]], output_csv_path: str) -> str:
@@ -110,14 +116,16 @@ def write_team_lead_xlsx(rows: List[Dict[str, int]], output_csv_path: str) -> st
     ws = wb.active
     ws.title = "Daily Visits by Team Lead"
 
-    headers = ["Date"] + LEAD_ORDER
+    headers = ["Date"] + LEAD_ORDER + ["Total"]
     ws.append(headers)
     for cell in ws[1]:
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center")
 
     for r in rows:
-        ws.append([r.get("Date", "")] + [int(r.get(lead, 0) or 0) for lead in LEAD_ORDER])
+        lead_values = [int(r.get(lead, 0) or 0) for lead in LEAD_ORDER]
+        total_value = sum(lead_values)
+        ws.append([r.get("Date", "")] + lead_values + [total_value])
 
     # Autosize columns
     for col in ws.columns:
