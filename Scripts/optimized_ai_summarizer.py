@@ -217,6 +217,19 @@ Response:"""
                 checkins_count = summary.get('total_checkins_today', 0)
                 return f"Great question! I just checked today's data and I'm happy to report that **{agents_count} people worked today**. They've been quite productive too - they completed a total of {checkins_count} checkins! That's excellent work from your team. Is there anything specific about today's performance you'd like me to look into?"
         
+        # Handle specific date questions
+        if 'specific_date_data' in context_data and 'summary' in context_data['specific_date_data']:
+            summary = context_data['specific_date_data']['summary']
+            date = summary.get('date', 'that date')
+            agents_count = summary.get('agents_working', 0)
+            checkins_count = summary.get('total_checkins', 0)
+            shops_visited = summary.get('shops_visited', 0)
+            
+            if agents_count > 0:
+                return f"Excellent question! I just looked up the data for {date} and I'm happy to tell you that **{agents_count} people worked on that day**. They were quite busy too - they completed a total of {checkins_count} checkins and visited {shops_visited} different shops. That's some impressive productivity! Would you like me to show you who the top performers were on that specific day?"
+            else:
+                return f"I checked the data for {date}, but unfortunately there's no record of any agents working on that specific day. This could mean it was a weekend, holiday, or there might not have been any scheduled activities. Would you like me to check a different date or show you the most recent activity data?"
+        
         # Handle performance questions
         if 'performance' in question_lower or 'best' in question_lower:
             if 'performance_data' in context_data and 'top_performer' in context_data['performance_data']:
