@@ -134,9 +134,9 @@ class OptimizedAISummarizer:
             return self._create_contextual_answer(question, context_data)
     
     def _create_question_prompt(self, question: str, context_data: Dict[str, Any] = None) -> str:
-        """Create a prompt for answering specific questions"""
+        """Create a prompt for answering specific questions in a conversational way"""
         
-        prompt = f"""You are a business intelligence assistant for a sales team. Answer the following question about sales data with specific, actionable insights.
+        prompt = f"""You are a friendly and professional business intelligence assistant for a sales team. Respond to the user's question in a natural, conversational way as if you're having a dialogue with them. Be helpful, informative, and engaging.
 
 Question: {question}
 
@@ -145,9 +145,11 @@ Question: {question}
         if context_data:
             # Format context data nicely
             context_str = self._format_context_data(context_data)
-            prompt += f"Data Context:\n{context_str}\n\n"
+            prompt += f"Here's the relevant data:\n{context_str}\n\n"
         
-        prompt += "Please provide a comprehensive answer based on the data. Include specific numbers, trends, and actionable insights where possible.\n\nAnswer:"
+        prompt += """Please respond in a conversational, human-like way. Start with a friendly acknowledgment, provide the information clearly, and end with a helpful follow-up or additional insight. Make it sound like you're talking to a colleague, not just listing data.
+
+Response:"""
         
         return prompt
     
@@ -199,12 +201,12 @@ Question: {question}
         return "\n".join(enhanced_parts)
     
     def _create_contextual_answer(self, question: str, context_data: Dict[str, Any] = None) -> str:
-        """Create a contextual answer without AI generation"""
+        """Create a contextual answer in a conversational dialogue style"""
         
         if not context_data:
-            return f"I understand you're asking: '{question}'. However, I need more context data to provide a comprehensive answer."
+            return f"Hi there! I'd love to help you with that question about '{question}', but I need to access some data first. Let me check our database connection and get back to you with the information you need."
         
-        # Create a natural, human-like response
+        # Create a natural, conversational response
         question_lower = question.lower()
         
         # Handle "how many people worked today" type questions
@@ -213,7 +215,7 @@ Question: {question}
                 summary = context_data['today_data']['summary']
                 agents_count = summary.get('agents_working_today', 0)
                 checkins_count = summary.get('total_checkins_today', 0)
-                return f"📊 **{agents_count} people worked today!**\n\nThey completed a total of {checkins_count} checkins, which shows great productivity from your team."
+                return f"Great question! I just checked today's data and I'm happy to report that **{agents_count} people worked today**. They've been quite productive too - they completed a total of {checkins_count} checkins! That's excellent work from your team. Is there anything specific about today's performance you'd like me to look into?"
         
         # Handle performance questions
         if 'performance' in question_lower or 'best' in question_lower:
@@ -222,7 +224,7 @@ Question: {question}
                 if top_performer:
                     name = top_performer.get('agent_name', 'Unknown')
                     checkins = top_performer.get('total_checkins', 0)
-                    return f"🏆 **{name} is your top performer!**\n\nThey have completed {checkins} total checkins, making them the most productive agent on your team."
+                    return f"Excellent question! Looking at the performance data, I can see that **{name} is your top performer** right now. They've completed an impressive {checkins} total checkins, which really shows their dedication and effectiveness. Would you like me to break down their performance further or compare them with other team members?"
         
         # Handle monthly questions
         if 'month' in question_lower or 'monthly' in question_lower:
@@ -232,7 +234,7 @@ Question: {question}
                 active_agents = summary.get('active_agents_month', 0)
                 active_days = summary.get('active_days_month', 0)
                 avg_daily = total_checkins / active_days if active_days > 0 else 0
-                return f"📈 **Monthly Performance Summary:**\n\n• Total checkins this month: {total_checkins}\n• Active agents: {active_agents}\n• Active days: {active_days}\n• Average daily checkins: {avg_daily:.1f}\n\nYour team is performing very well this month!"
+                return f"Let me give you a comprehensive overview of this month's performance! Your team has been doing really well - they've completed **{total_checkins} total checkins** across **{active_days} active days** with **{active_agents} agents** working. That averages out to about **{avg_daily:.1f} checkins per day**, which is quite impressive! How does this compare to what you were expecting for the month?"
         
         # Handle shop/customer questions
         if any(word in question_lower for word in ['shop', 'customer', 'store']):
@@ -242,14 +244,14 @@ Question: {question}
                     top_shop = shops[0]
                     shop_name = top_shop.get('shop_name', 'Unknown')
                     checkin_count = top_shop.get('checkin_count', 0)
-                    return f"🏪 **{shop_name} is your top shop!**\n\nThey have received {checkin_count} checkins, making them the most visited location in your network."
+                    return f"That's a great question about your shop performance! I can see that **{shop_name} is your top-performing shop** right now with {checkin_count} checkins. They seem to be getting a lot of attention from your team. Would you like me to show you the full ranking of shops or analyze what makes this particular shop so successful?"
         
-        # Default response with structured data
-        response_parts = []
+        # Default conversational response with structured data
+        response_parts = ["Thanks for asking! Let me share what I found in the data:"]
         
         if 'today_data' in context_data and 'summary' in context_data['today_data']:
             summary = context_data['today_data']['summary']
-            response_parts.append(f"📊 **Today's Activity:**")
+            response_parts.append(f"\n📊 **Today's Activity:**")
             response_parts.append(f"• Total checkins: {summary.get('total_checkins_today', 0)}")
             response_parts.append(f"• Active agents: {summary.get('agents_working_today', 0)}")
             response_parts.append(f"• Shops visited: {summary.get('shops_visited_today', 0)}")
@@ -277,9 +279,10 @@ Question: {question}
                     response_parts.append(f"{i}. {shop.get('shop_name', 'Unknown')}: {shop.get('checkin_count', 0)} checkins")
         
         if response_parts:
+            response_parts.append(f"\nIs there anything specific about this data you'd like me to explain further or any other questions you have?")
             return "\n".join(response_parts)
         else:
-            return f"I understand you're asking: '{question}'. Let me analyze the data and provide you with the most relevant information."
+            return f"Hi! I'd be happy to help you with that question about '{question}'. Let me take a look at the data and see what insights I can provide for you. What specific aspect would you like me to focus on?"
 
 if __name__ == "__main__":
     # Test the optimized AI summarizer
