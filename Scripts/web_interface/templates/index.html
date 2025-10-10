@@ -320,30 +320,30 @@
     <div class="chat-container">
         <div class="chat-header">
             <div class="status-indicator" id="statusIndicator"></div>
-            <h1><i class="fas fa-robot"></i> SalesSync AI Assistant</h1>
-            <p>Ask me anything about your sales data!</p>
+            <h1><i class="fas fa-chart-bar"></i> SalesSync AI Assistant</h1>
+            <p>Business Intelligence & Analytics Platform</p>
         </div>
 
         <div class="chat-messages" id="chatMessages">
             <div class="welcome-message">
-                <h2>Welcome to SalesSync AI Assistant! 🤖</h2>
-                <p>I can help you analyze your sales data, track agent performance, and provide insights about your business.</p>
+                <h2>SalesSync AI Assistant</h2>
+                <p>Your intelligent business intelligence platform for sales data analysis and performance insights.</p>
                 
                 <div class="feature-list">
                     <div class="feature-item">
                         <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                        <h3>Performance Analysis</h3>
-                        <p>Track agent and team performance</p>
+                        <h3>Performance Analytics</h3>
+                        <p>Comprehensive team and individual performance tracking</p>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon"><i class="fas fa-database"></i></div>
-                        <h3>Real-time Data</h3>
-                        <p>Access live data from your database</p>
+                        <h3>Real-time Intelligence</h3>
+                        <p>Live data processing and instant insights</p>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>AI Insights</h3>
-                        <p>Get intelligent analysis and recommendations</p>
+                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                        <h3>AI-Powered Analysis</h3>
+                        <p>Advanced machine learning for business intelligence</p>
                     </div>
                 </div>
             </div>
@@ -362,18 +362,15 @@
 
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything about your sales data..." autocomplete="off">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Enter your business intelligence query..." autocomplete="off">
                 <button id="sendButton" class="send-button">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
             
-            <div class="examples-container">
-                <div class="examples-title">💡 Try asking:</div>
-                <div class="examples-grid" id="examplesGrid">
-                    <!-- Examples will be loaded here -->
-                </div>
-            </div>
+        <div class="examples-container" style="display: none;">
+            <!-- Examples removed for professional look -->
+        </div>
         </div>
     </div>
 
@@ -385,10 +382,8 @@
                 this.sendButton = document.getElementById('sendButton');
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.statusIndicator = document.getElementById('statusIndicator');
-                this.examplesGrid = document.getElementById('examplesGrid');
                 
                 this.initializeEventListeners();
-                this.loadExamples();
                 this.checkStatus();
             }
 
@@ -416,25 +411,6 @@
                 }
             }
 
-            async loadExamples() {
-                try {
-                    const response = await fetch('/api/examples');
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.examplesGrid.innerHTML = data.examples.map(example => 
-                            `<div class="example-button" onclick="chatBot.sendExampleMessage('${example}')">${example}</div>`
-                        ).join('');
-                    }
-                } catch (error) {
-                    console.error('Error loading examples:', error);
-                }
-            }
-
-            sendExampleMessage(example) {
-                this.chatInput.value = example;
-                this.sendMessage();
-            }
 
             async sendMessage() {
                 const message = this.chatInput.value.trim();
@@ -503,14 +479,57 @@
                 // Format the message content for better display
                 let formatted = content.replace(/\n/g, '<br>');
                 
-                // Format JSON-like data
+                // Remove JSON formatting and make it more human-like
                 if (content.includes('{') && content.includes('}')) {
                     try {
                         const jsonMatch = content.match(/\{[\s\S]*\}/);
                         if (jsonMatch) {
                             const jsonStr = jsonMatch[0];
                             const jsonObj = JSON.parse(jsonStr);
-                            formatted = content.replace(jsonStr, `<pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 0.9rem;">${JSON.stringify(jsonObj, null, 2)}</pre>`);
+                            
+                            // Convert JSON to human-readable format
+                            let humanReadable = '';
+                            
+                            // Handle different data structures
+                            if (jsonObj.today_data && jsonObj.today_data.summary) {
+                                const summary = jsonObj.today_data.summary;
+                                humanReadable += `📊 <strong>Today's Activity:</strong><br>`;
+                                humanReadable += `• Total checkins: ${summary.total_checkins_today || 0}<br>`;
+                                humanReadable += `• Active agents: ${summary.agents_working_today || 0}<br>`;
+                                humanReadable += `• Shops visited: ${summary.shops_visited_today || 0}<br>`;
+                            }
+                            
+                            if (jsonObj.monthly_data && jsonObj.monthly_data.summary) {
+                                const summary = jsonObj.monthly_data.summary;
+                                humanReadable += `<br>📈 <strong>Monthly Performance:</strong><br>`;
+                                humanReadable += `• Total checkins: ${summary.total_checkins_month || 0}<br>`;
+                                humanReadable += `• Active agents: ${summary.active_agents_month || 0}<br>`;
+                                humanReadable += `• Unique shops: ${summary.unique_shops_month || 0}<br>`;
+                                humanReadable += `• Active days: ${summary.active_days_month || 0}<br>`;
+                            }
+                            
+                            if (jsonObj.performance_data && jsonObj.performance_data.agent_performance) {
+                                const agents = jsonObj.performance_data.agent_performance;
+                                humanReadable += `<br>👥 <strong>Top Performers:</strong><br>`;
+                                agents.slice(0, 5).forEach((agent, index) => {
+                                    humanReadable += `${index + 1}. ${agent.agent_name}: ${agent.total_checkins} checkins<br>`;
+                                });
+                            }
+                            
+                            if (jsonObj.customer_data && jsonObj.customer_data.top_shops) {
+                                const shops = jsonObj.customer_data.top_shops;
+                                humanReadable += `<br>🏪 <strong>Top Shops:</strong><br>`;
+                                shops.slice(0, 5).forEach((shop, index) => {
+                                    humanReadable += `${index + 1}. ${shop.shop_name}: ${shop.checkin_count} checkins<br>`;
+                                });
+                            }
+                            
+                            if (humanReadable) {
+                                formatted = content.replace(jsonStr, humanReadable);
+                            } else {
+                                // Fallback to formatted JSON
+                                formatted = content.replace(jsonStr, `<pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 0.9rem;">${JSON.stringify(jsonObj, null, 2)}</pre>`);
+                            }
                         }
                     } catch (e) {
                         // If JSON parsing fails, keep original content
