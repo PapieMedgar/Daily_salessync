@@ -204,46 +204,82 @@ Question: {question}
         if not context_data:
             return f"I understand you're asking: '{question}'. However, I need more context data to provide a comprehensive answer."
         
-        # Create a structured response based on context
-        response_parts = [f"Based on your question: '{question}'"]
-        
-        # Analyze the question and provide relevant data
+        # Create a natural, human-like response
         question_lower = question.lower()
         
-        if 'today' in question_lower and 'today_data' in context_data:
-            today_data = context_data['today_data']
-            if 'summary' in today_data:
-                summary = today_data['summary']
-                response_parts.append(f"\n📊 Today's Activity:")
-                response_parts.append(f"• Total checkins: {summary.get('total_checkins_today', 0)}")
-                response_parts.append(f"• Active agents: {summary.get('agents_working_today', 0)}")
-                response_parts.append(f"• Shops visited: {summary.get('shops_visited_today', 0)}")
+        # Handle "how many people worked today" type questions
+        if any(word in question_lower for word in ['people', 'agents', 'workers', 'staff']) and 'today' in question_lower:
+            if 'today_data' in context_data and 'summary' in context_data['today_data']:
+                summary = context_data['today_data']['summary']
+                agents_count = summary.get('agents_working_today', 0)
+                checkins_count = summary.get('total_checkins_today', 0)
+                return f"📊 **{agents_count} people worked today!**\n\nThey completed a total of {checkins_count} checkins, which shows great productivity from your team."
         
-        if 'month' in question_lower and 'monthly_data' in context_data:
-            monthly_data = context_data['monthly_data']
-            if 'summary' in monthly_data:
-                summary = monthly_data['summary']
-                response_parts.append(f"\n📈 Monthly Performance:")
-                response_parts.append(f"• Total checkins: {summary.get('total_checkins_month', 0)}")
-                response_parts.append(f"• Active agents: {summary.get('active_agents_month', 0)}")
-                response_parts.append(f"• Unique shops: {summary.get('unique_shops_month', 0)}")
-                response_parts.append(f"• Active days: {summary.get('active_days_month', 0)}")
+        # Handle performance questions
+        if 'performance' in question_lower or 'best' in question_lower:
+            if 'performance_data' in context_data and 'top_performer' in context_data['performance_data']:
+                top_performer = context_data['performance_data']['top_performer']
+                if top_performer:
+                    name = top_performer.get('agent_name', 'Unknown')
+                    checkins = top_performer.get('total_checkins', 0)
+                    return f"🏆 **{name} is your top performer!**\n\nThey have completed {checkins} total checkins, making them the most productive agent on your team."
         
-        if 'performance' in question_lower and 'performance_data' in context_data:
-            perf_data = context_data['performance_data']
-            if 'agent_performance' in perf_data and perf_data['agent_performance']:
-                response_parts.append(f"\n👥 Agent Performance:")
-                for i, agent in enumerate(perf_data['agent_performance'][:5], 1):
+        # Handle monthly questions
+        if 'month' in question_lower or 'monthly' in question_lower:
+            if 'monthly_data' in context_data and 'summary' in context_data['monthly_data']:
+                summary = context_data['monthly_data']['summary']
+                total_checkins = summary.get('total_checkins_month', 0)
+                active_agents = summary.get('active_agents_month', 0)
+                active_days = summary.get('active_days_month', 0)
+                avg_daily = total_checkins / active_days if active_days > 0 else 0
+                return f"📈 **Monthly Performance Summary:**\n\n• Total checkins this month: {total_checkins}\n• Active agents: {active_agents}\n• Active days: {active_days}\n• Average daily checkins: {avg_daily:.1f}\n\nYour team is performing very well this month!"
+        
+        # Handle shop/customer questions
+        if any(word in question_lower for word in ['shop', 'customer', 'store']):
+            if 'customer_data' in context_data and 'top_shops' in context_data['customer_data']:
+                shops = context_data['customer_data']['top_shops']
+                if shops:
+                    top_shop = shops[0]
+                    shop_name = top_shop.get('shop_name', 'Unknown')
+                    checkin_count = top_shop.get('checkin_count', 0)
+                    return f"🏪 **{shop_name} is your top shop!**\n\nThey have received {checkin_count} checkins, making them the most visited location in your network."
+        
+        # Default response with structured data
+        response_parts = []
+        
+        if 'today_data' in context_data and 'summary' in context_data['today_data']:
+            summary = context_data['today_data']['summary']
+            response_parts.append(f"📊 **Today's Activity:**")
+            response_parts.append(f"• Total checkins: {summary.get('total_checkins_today', 0)}")
+            response_parts.append(f"• Active agents: {summary.get('agents_working_today', 0)}")
+            response_parts.append(f"• Shops visited: {summary.get('shops_visited_today', 0)}")
+        
+        if 'monthly_data' in context_data and 'summary' in context_data['monthly_data']:
+            summary = context_data['monthly_data']['summary']
+            response_parts.append(f"\n📈 **Monthly Performance:**")
+            response_parts.append(f"• Total checkins: {summary.get('total_checkins_month', 0)}")
+            response_parts.append(f"• Active agents: {summary.get('active_agents_month', 0)}")
+            response_parts.append(f"• Unique shops: {summary.get('unique_shops_month', 0)}")
+            response_parts.append(f"• Active days: {summary.get('active_days_month', 0)}")
+        
+        if 'performance_data' in context_data and 'agent_performance' in context_data['performance_data']:
+            agents = context_data['performance_data']['agent_performance']
+            if agents:
+                response_parts.append(f"\n👥 **Top Performers:**")
+                for i, agent in enumerate(agents[:5], 1):
                     response_parts.append(f"{i}. {agent.get('agent_name', 'Unknown')}: {agent.get('total_checkins', 0)} checkins")
         
-        if 'shop' in question_lower and 'customer_data' in context_data:
-            customer_data = context_data['customer_data']
-            if 'top_shops' in customer_data and customer_data['top_shops']:
-                response_parts.append(f"\n🏪 Top Shops:")
-                for i, shop in enumerate(customer_data['top_shops'][:5], 1):
+        if 'customer_data' in context_data and 'top_shops' in context_data['customer_data']:
+            shops = context_data['customer_data']['top_shops']
+            if shops:
+                response_parts.append(f"\n🏪 **Top Shops:**")
+                for i, shop in enumerate(shops[:5], 1):
                     response_parts.append(f"{i}. {shop.get('shop_name', 'Unknown')}: {shop.get('checkin_count', 0)} checkins")
         
-        return "\n".join(response_parts)
+        if response_parts:
+            return "\n".join(response_parts)
+        else:
+            return f"I understand you're asking: '{question}'. Let me analyze the data and provide you with the most relevant information."
 
 if __name__ == "__main__":
     # Test the optimized AI summarizer

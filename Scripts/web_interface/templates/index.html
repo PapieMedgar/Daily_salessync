@@ -503,14 +503,57 @@
                 // Format the message content for better display
                 let formatted = content.replace(/\n/g, '<br>');
                 
-                // Format JSON-like data
+                // Remove JSON formatting and make it more human-like
                 if (content.includes('{') && content.includes('}')) {
                     try {
                         const jsonMatch = content.match(/\{[\s\S]*\}/);
                         if (jsonMatch) {
                             const jsonStr = jsonMatch[0];
                             const jsonObj = JSON.parse(jsonStr);
-                            formatted = content.replace(jsonStr, `<pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 0.9rem;">${JSON.stringify(jsonObj, null, 2)}</pre>`);
+                            
+                            // Convert JSON to human-readable format
+                            let humanReadable = '';
+                            
+                            // Handle different data structures
+                            if (jsonObj.today_data && jsonObj.today_data.summary) {
+                                const summary = jsonObj.today_data.summary;
+                                humanReadable += `📊 <strong>Today's Activity:</strong><br>`;
+                                humanReadable += `• Total checkins: ${summary.total_checkins_today || 0}<br>`;
+                                humanReadable += `• Active agents: ${summary.agents_working_today || 0}<br>`;
+                                humanReadable += `• Shops visited: ${summary.shops_visited_today || 0}<br>`;
+                            }
+                            
+                            if (jsonObj.monthly_data && jsonObj.monthly_data.summary) {
+                                const summary = jsonObj.monthly_data.summary;
+                                humanReadable += `<br>📈 <strong>Monthly Performance:</strong><br>`;
+                                humanReadable += `• Total checkins: ${summary.total_checkins_month || 0}<br>`;
+                                humanReadable += `• Active agents: ${summary.active_agents_month || 0}<br>`;
+                                humanReadable += `• Unique shops: ${summary.unique_shops_month || 0}<br>`;
+                                humanReadable += `• Active days: ${summary.active_days_month || 0}<br>`;
+                            }
+                            
+                            if (jsonObj.performance_data && jsonObj.performance_data.agent_performance) {
+                                const agents = jsonObj.performance_data.agent_performance;
+                                humanReadable += `<br>👥 <strong>Top Performers:</strong><br>`;
+                                agents.slice(0, 5).forEach((agent, index) => {
+                                    humanReadable += `${index + 1}. ${agent.agent_name}: ${agent.total_checkins} checkins<br>`;
+                                });
+                            }
+                            
+                            if (jsonObj.customer_data && jsonObj.customer_data.top_shops) {
+                                const shops = jsonObj.customer_data.top_shops;
+                                humanReadable += `<br>🏪 <strong>Top Shops:</strong><br>`;
+                                shops.slice(0, 5).forEach((shop, index) => {
+                                    humanReadable += `${index + 1}. ${shop.shop_name}: ${shop.checkin_count} checkins<br>`;
+                                });
+                            }
+                            
+                            if (humanReadable) {
+                                formatted = content.replace(jsonStr, humanReadable);
+                            } else {
+                                // Fallback to formatted JSON
+                                formatted = content.replace(jsonStr, `<pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 0.9rem;">${JSON.stringify(jsonObj, null, 2)}</pre>`);
+                            }
                         }
                     } catch (e) {
                         // If JSON parsing fails, keep original content
