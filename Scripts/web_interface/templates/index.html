@@ -320,30 +320,30 @@
     <div class="chat-container">
         <div class="chat-header">
             <div class="status-indicator" id="statusIndicator"></div>
-            <h1><i class="fas fa-robot"></i> SalesSync AI Assistant</h1>
-            <p>Ask me anything about your sales data!</p>
+            <h1><i class="fas fa-chart-bar"></i> SalesSync AI Assistant</h1>
+            <p>Business Intelligence & Analytics Platform</p>
         </div>
 
         <div class="chat-messages" id="chatMessages">
             <div class="welcome-message">
-                <h2>Welcome to SalesSync AI Assistant! 🤖</h2>
-                <p>I can help you analyze your sales data, track agent performance, and provide insights about your business.</p>
+                <h2>SalesSync AI Assistant</h2>
+                <p>Your intelligent business intelligence platform for sales data analysis and performance insights.</p>
                 
                 <div class="feature-list">
                     <div class="feature-item">
                         <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                        <h3>Performance Analysis</h3>
-                        <p>Track agent and team performance</p>
+                        <h3>Performance Analytics</h3>
+                        <p>Comprehensive team and individual performance tracking</p>
                     </div>
                     <div class="feature-item">
                         <div class="feature-icon"><i class="fas fa-database"></i></div>
-                        <h3>Real-time Data</h3>
-                        <p>Access live data from your database</p>
+                        <h3>Real-time Intelligence</h3>
+                        <p>Live data processing and instant insights</p>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>AI Insights</h3>
-                        <p>Get intelligent analysis and recommendations</p>
+                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                        <h3>AI-Powered Analysis</h3>
+                        <p>Advanced machine learning for business intelligence</p>
                     </div>
                 </div>
             </div>
@@ -362,18 +362,15 @@
 
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything about your sales data..." autocomplete="off">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Enter your business intelligence query..." autocomplete="off">
                 <button id="sendButton" class="send-button">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
             
-            <div class="examples-container">
-                <div class="examples-title">💡 Try asking:</div>
-                <div class="examples-grid" id="examplesGrid">
-                    <!-- Examples will be loaded here -->
-                </div>
-            </div>
+        <div class="examples-container" style="display: none;">
+            <!-- Examples removed for professional look -->
+        </div>
         </div>
     </div>
 
@@ -385,10 +382,8 @@
                 this.sendButton = document.getElementById('sendButton');
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.statusIndicator = document.getElementById('statusIndicator');
-                this.examplesGrid = document.getElementById('examplesGrid');
                 
                 this.initializeEventListeners();
-                this.loadExamples();
                 this.checkStatus();
             }
 
@@ -416,25 +411,6 @@
                 }
             }
 
-            async loadExamples() {
-                try {
-                    const response = await fetch('/api/examples');
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.examplesGrid.innerHTML = data.examples.map(example => 
-                            `<div class="example-button" onclick="chatBot.sendExampleMessage('${example}')">${example}</div>`
-                        ).join('');
-                    }
-                } catch (error) {
-                    console.error('Error loading examples:', error);
-                }
-            }
-
-            sendExampleMessage(example) {
-                this.chatInput.value = example;
-                this.sendMessage();
-            }
 
             async sendMessage() {
                 const message = this.chatInput.value.trim();

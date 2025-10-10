@@ -107,33 +107,10 @@ def status():
 
 @app.route('/api/examples')
 def examples():
-    """Get example questions"""
-    examples = [
-        "What are the total checkins this month?",
-        "Which agent has the best performance?",
-        "Show me the top 10 shops by checkin count",
-        "What are the weekly checkin trends?",
-        "How many unique shops did we visit?",
-        "Which agents are most active?",
-        "What's the average checkins per day?",
-        "Show me shop visit patterns",
-        "What's our agent performance summary?",
-        "How many checkins did we have last week?",
-        "Which shops haven't been visited recently?",
-        "Show me the busiest days of the week",
-        "Which agent has the most repeat shop visits?",
-        "What's our shop retention rate?",
-        "How many agents have worked today?",
-        "What's the current month's performance?",
-        "Show me agent activity by day",
-        "Which agents are underperforming?",
-        "What's our daily checkin average?",
-        "Show me the latest checkin data"
-    ]
-    
+    """Get example questions - removed for professional interface"""
     return jsonify({
         'success': True,
-        'examples': examples
+        'examples': []
     })
 
 if __name__ == '__main__':
