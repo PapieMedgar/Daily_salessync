@@ -149,6 +149,14 @@ class EnhancedDatabaseQASystem:
         if any(word in question_lower for word in ['month', 'this month', 'current month']):
             relevant_data.update(self._get_monthly_data())
         
+        # Agent-specific queries
+        if any(word in question_lower for word in ['agent', 'agents', 'how many agents', 'agent count', 'total agents']):
+            relevant_data.update(self._get_agent_data())
+        
+        # User-specific queries (since agents are users with role='agent')
+        if any(word in question_lower for word in ['user', 'users', 'how many users', 'user count', 'total users']):
+            relevant_data.update(self._get_user_data())
+        
         # If no specific keywords, get general summary
         if not relevant_data:
             relevant_data = self.get_sales_data_summary()
@@ -349,6 +357,101 @@ class EnhancedDatabaseQASystem:
         except Exception as e:
             return {"monthly_data": {"error": str(e)}}
     
+    def _get_agent_data(self) -> Dict[str, Any]:
+        """Get agent-specific data"""
+        try:
+            # Count total agents (users with role='agent')
+            agent_count_query = """
+            SELECT COUNT(*) as total_agents
+            FROM users 
+            WHERE role = 'agent' AND is_active = 1
+            """
+            
+            agent_count_data = self.execute_query(agent_count_query)
+            total_agents = int(agent_count_data['total_agents'].iloc[0]) if not agent_count_data.empty else 0
+            
+            # Get agent details
+            agent_details_query = """
+            SELECT 
+                u.id,
+                u.name,
+                u.phone,
+                u.created_at,
+                COUNT(c.id) as total_checkins,
+                MAX(c.timestamp) as last_checkin,
+                MIN(c.timestamp) as first_checkin
+            FROM users u
+            LEFT JOIN checkins c ON u.id = c.agent_id
+            WHERE u.role = 'agent' AND u.is_active = 1
+            GROUP BY u.id, u.name, u.phone, u.created_at
+            ORDER BY total_checkins DESC
+            """
+            
+            agent_details = self.execute_query(agent_details_query)
+            
+            return {
+                "agent_data": {
+                    "total_agents": total_agents,
+                    "agent_details": agent_details.to_dict('records') if not agent_details.empty else [],
+                    "active_agents": len([agent for agent in agent_details.to_dict('records') if agent['total_checkins'] > 0]) if not agent_details.empty else 0
+                }
+            }
+        except Exception as e:
+            return {"agent_data": {"error": str(e)}}
+    
+    def _get_user_data(self) -> Dict[str, Any]:
+        """Get user-specific data"""
+        try:
+            # Count total users by role
+            user_count_query = """
+            SELECT 
+                role,
+                COUNT(*) as count
+            FROM users 
+            WHERE is_active = 1
+            GROUP BY role
+            """
+            
+            user_count_data = self.execute_query(user_count_query)
+            
+            # Get total users
+            total_users_query = """
+            SELECT COUNT(*) as total_users
+            FROM users 
+            WHERE is_active = 1
+            """
+            
+            total_users_data = self.execute_query(total_users_query)
+            total_users = int(total_users_data['total_users'].iloc[0]) if not total_users_data.empty else 0
+            
+            # Get user details
+            user_details_query = """
+            SELECT 
+                u.id,
+                u.name,
+                u.role,
+                u.phone,
+                u.created_at,
+                COUNT(c.id) as total_checkins
+            FROM users u
+            LEFT JOIN checkins c ON u.id = c.agent_id
+            WHERE u.is_active = 1
+            GROUP BY u.id, u.name, u.role, u.phone, u.created_at
+            ORDER BY u.role, total_checkins DESC
+            """
+            
+            user_details = self.execute_query(user_details_query)
+            
+            return {
+                "user_data": {
+                    "total_users": total_users,
+                    "users_by_role": user_count_data.to_dict('records') if not user_count_data.empty else [],
+                    "user_details": user_details.to_dict('records') if not user_details.empty else []
+                }
+            }
+        except Exception as e:
+            return {"user_data": {"error": str(e)}}
+    
     def _generate_basic_answer(self, question: str, data: Dict[str, Any]) -> str:
         """Generate basic answer without AI"""
         question_lower = question.lower()
@@ -376,6 +479,23 @@ class EnhancedDatabaseQASystem:
             if 'summary' in today_data:
                 summary = today_data['summary']
                 return f"Today's activity: {summary.get('total_checkins_today', 0)} checkins by {summary.get('agents_working_today', 0)} agents"
+        
+        # Agent count questions
+        if 'agent' in question_lower and ('how many' in question_lower or 'count' in question_lower):
+            agent_data = data.get('agent_data', {})
+            if 'total_agents' in agent_data:
+                total_agents = agent_data['total_agents']
+                active_agents = agent_data.get('active_agents', 0)
+                return f"You have {total_agents} total agents, with {active_agents} active agents who have made checkins."
+        
+        # User count questions
+        if 'user' in question_lower and ('how many' in question_lower or 'count' in question_lower):
+            user_data = data.get('user_data', {})
+            if 'total_users' in user_data:
+                total_users = user_data['total_users']
+                users_by_role = user_data.get('users_by_role', [])
+                role_breakdown = ", ".join([f"{role['role']}: {role['count']}" for role in users_by_role])
+                return f"You have {total_users} total users ({role_breakdown})."
         
         # Default response
         return f"Based on the available data: {json.dumps(data, indent=2, default=str)}"
