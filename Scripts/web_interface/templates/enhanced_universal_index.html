@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Universal SalesSync AI Assistant</title>
+    <title>SalesSync AI</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -42,25 +42,11 @@
         }
 
         .chat-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 600;
         }
 
-        .chat-header p {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-
-        .enhanced-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
 
         .executive-summary-badge {
             position: absolute;
@@ -278,67 +264,23 @@
 
         .welcome-message {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             color: #6b7280;
         }
 
         .welcome-message h2 {
             color: #374151;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            font-weight: 500;
         }
 
         .welcome-message p {
-            margin-bottom: 20px;
-        }
-
-        .feature-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .feature-item {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.2s;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: #4f46e5;
-        }
-
-        .feature-title {
+            margin-bottom: 0;
             font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #374151;
         }
 
-        .feature-description {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
 
-        .enhanced-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
 
         .error-message {
             background: #fef2f2;
@@ -349,38 +291,6 @@
             margin-bottom: 20px;
         }
 
-        .examples-container {
-            margin-top: 15px;
-        }
-
-        .examples-title {
-            font-size: 0.9rem;
-            color: #6b7280;
-            margin-bottom: 10px;
-        }
-
-        .examples-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-        }
-
-        .example-button {
-            padding: 8px 12px;
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
-
-        .example-button:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
-        }
 
         .executive-summary-content {
             background: #f8fafc;
@@ -402,9 +312,6 @@
                 max-width: 85%;
             }
             
-            .examples-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
@@ -415,49 +322,13 @@
             <div class="executive-summary-badge" id="executiveSummaryBadge" title="Generate Executive Summary">
                 <i class="fas fa-chart-bar"></i>
             </div>
-            <div class="enhanced-badge">ENHANCED + TINY AI</div>
-            <h1><i class="fas fa-infinity"></i> Enhanced Universal SalesSync AI</h1>
-            <p>Ask ANYTHING + Generate Executive Summaries!</p>
+            <h1>SalesSync AI</h1>
         </div>
 
         <div class="chat-messages" id="chatMessages">
             <div class="welcome-message">
-                <div class="enhanced-badge">ENHANCED WITH TINY AI SUMMARIZER</div>
-                <h2>Enhanced Universal SalesSync AI Assistant</h2>
-                <p>Your intelligent business intelligence platform that can answer ANY question about your sales data and generate comprehensive executive summaries using Tiny AI technology!</p>
-                
-                <div class="feature-list">
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-infinity"></i></div>
-                        <div class="feature-title">Unlimited Questions</div>
-                        <div class="feature-description">Ask anything - no demo question restrictions</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
-                        <div class="feature-title">Executive Summaries</div>
-                        <div class="feature-description">Generate comprehensive business reports</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
-                        <div class="feature-title">Tiny AI Technology</div>
-                        <div class="feature-description">Lightweight AI model for efficient processing</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-comments"></i></div>
-                        <div class="feature-title">Natural Language</div>
-                        <div class="feature-description">Get human-like responses, not JSON data</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="feature-title">Date-Aware</div>
-                        <div class="feature-description">Understand specific dates and time periods</div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                        <div class="feature-title">Performance Insights</div>
-                        <div class="feature-description">Deep analysis of team and individual performance</div>
-                    </div>
-                </div>
+                <h2>Welcome to SalesSync AI</h2>
+                <p>Your intelligent business assistant for sales data analysis and insights.</p>
             </div>
         </div>
 
@@ -474,7 +345,7 @@
 
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me ANYTHING about your data or type 'executive summary'..." autocomplete="off">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me about your sales data..." autocomplete="off">
                 <button id="sendButton" class="send-button">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -483,12 +354,6 @@
                 </button>
             </div>
             
-            <div class="examples-container" id="examplesContainer" style="display: none;">
-                <div class="examples-title">Example questions (click to try):</div>
-                <div class="examples-grid" id="examplesGrid">
-                    <!-- Examples will be loaded dynamically -->
-                </div>
-            </div>
         </div>
     </div>
 
@@ -501,12 +366,9 @@
                 this.executiveSummaryButton = document.getElementById('executiveSummaryButton');
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.statusIndicator = document.getElementById('statusIndicator');
-                this.examplesContainer = document.getElementById('examplesContainer');
-                this.examplesGrid = document.getElementById('examplesGrid');
                 
                 this.initializeEventListeners();
                 this.checkStatus();
-                this.loadExamples();
             }
 
             initializeEventListeners() {
@@ -515,20 +377,6 @@
                 this.chatInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         this.sendMessage();
-                    }
-                });
-                
-                // Show examples on focus
-                this.chatInput.addEventListener('focus', () => {
-                    this.examplesContainer.style.display = 'block';
-                });
-                
-                // Hide examples when typing
-                this.chatInput.addEventListener('input', () => {
-                    if (this.chatInput.value.trim()) {
-                        this.examplesContainer.style.display = 'none';
-                    } else {
-                        this.examplesContainer.style.display = 'block';
                     }
                 });
             }
@@ -548,28 +396,6 @@
                 }
             }
 
-            async loadExamples() {
-                try {
-                    const response = await fetch('/api/examples');
-                    const data = await response.json();
-                    
-                    if (data.success && data.examples) {
-                        this.examplesGrid.innerHTML = '';
-                        data.examples.forEach(example => {
-                            const button = document.createElement('button');
-                            button.className = 'example-button';
-                            button.textContent = example;
-                            button.addEventListener('click', () => {
-                                this.chatInput.value = example;
-                                this.sendMessage();
-                            });
-                            this.examplesGrid.appendChild(button);
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error loading examples:', error);
-                }
-            }
 
             async sendMessage() {
                 const message = this.chatInput.value.trim();
@@ -581,7 +407,6 @@
                 this.sendButton.disabled = true;
                 this.executiveSummaryButton.disabled = true;
                 this.showTyping();
-                this.examplesContainer.style.display = 'none';
 
                 try {
                     const response = await fetch('/api/chat', {
@@ -615,7 +440,6 @@
                 this.sendButton.disabled = true;
                 this.executiveSummaryButton.disabled = true;
                 this.showTyping();
-                this.examplesContainer.style.display = 'none';
 
                 try {
                     const response = await fetch('/api/executive-summary', {
