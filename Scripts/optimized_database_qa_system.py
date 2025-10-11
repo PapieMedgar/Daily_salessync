@@ -69,10 +69,13 @@ class OptimizedDatabaseQASystem:
             print(f"Error getting schema: {e}")
             return {}
     
-    def execute_query(self, query: str) -> pd.DataFrame:
+    def execute_query(self, query: str, params=None) -> pd.DataFrame:
         """Execute SQL query and return results as DataFrame"""
         try:
-            df = pd.read_sql(query, self.connection)
+            if params:
+                df = pd.read_sql(query, self.connection, params=params)
+            else:
+                df = pd.read_sql(query, self.connection)
             return df
         except Exception as e:
             print(f"Query execution error: {e}")
@@ -127,6 +130,46 @@ class OptimizedDatabaseQASystem:
         question_lower = question.lower()
         relevant_data = {}
         
+        # Check for specific date patterns (e.g., "first of october 2025", "october 1st 2025")
+        import re
+        date_patterns = [
+            r'first of (\w+) (\d{4})',
+            r'(\w+) (\d{1,2})(?:st|nd|rd|th)? (\d{4})',
+            r'(\d{1,2})/(\d{1,2})/(\d{4})',
+            r'(\d{4})-(\d{1,2})-(\d{1,2})'
+        ]
+        
+        for pattern in date_patterns:
+            match = re.search(pattern, question_lower)
+            if match:
+                try:
+                    if 'first of' in pattern:
+                        month_name, year = match.groups()
+                        month_num = self._get_month_number(month_name)
+                        if month_num:
+                            date_str = f"{year}-{month_num:02d}-01"
+                            relevant_data.update(self._get_specific_date_data(date_str))
+                    elif '/' in pattern or '-' in pattern:
+                        groups = match.groups()
+                        if len(groups) == 3:
+                            if '/' in pattern:  # MM/DD/YYYY or DD/MM/YYYY
+                                if len(groups[0]) <= 2 and len(groups[1]) <= 2:
+                                    date_str = f"{groups[2]}-{groups[0].zfill(2)}-{groups[1].zfill(2)}"
+                                else:
+                                    date_str = f"{groups[2]}-{groups[1].zfill(2)}-{groups[0].zfill(2)}"
+                            else:  # YYYY-MM-DD
+                                date_str = f"{groups[0]}-{groups[1].zfill(2)}-{groups[2].zfill(2)}"
+                            relevant_data.update(self._get_specific_date_data(date_str))
+                    else:
+                        month_name, day, year = match.groups()
+                        month_num = self._get_month_number(month_name)
+                        if month_num:
+                            date_str = f"{year}-{month_num:02d}-{day.zfill(2)}"
+                            relevant_data.update(self._get_specific_date_data(date_str))
+                    break
+                except Exception as e:
+                    print(f"Error parsing date: {e}")
+        
         # Enhanced keyword detection for better context
         if any(word in question_lower for word in ['visit', 'visits', 'daily', 'team', 'checkin', 'checkins']):
             relevant_data.update(self._get_visit_data())
@@ -151,6 +194,15 @@ class OptimizedDatabaseQASystem:
             relevant_data = self.get_sales_data_summary()
         
         return relevant_data
+    
+    def _get_month_number(self, month_name: str) -> int:
+        """Convert month name to number"""
+        months = {
+            'january': 1, 'february': 2, 'march': 3, 'april': 4,
+            'may': 5, 'june': 6, 'july': 7, 'august': 8,
+            'september': 9, 'october': 10, 'november': 11, 'december': 12
+        }
+        return months.get(month_name.lower(), None)
     
     def _get_visit_data(self) -> Dict[str, Any]:
         """Get visit-related data with enhanced metrics"""
@@ -345,6 +397,52 @@ class OptimizedDatabaseQASystem:
             }
         except Exception as e:
             return {"monthly_data": {"error": str(e)}}
+    
+    def _get_specific_date_data(self, date_str: str) -> Dict[str, Any]:
+        """Get data for a specific date"""
+        try:
+            # Get data for specific date
+            date_query = """
+            SELECT 
+                COUNT(*) as total_checkins,
+                COUNT(DISTINCT agent_id) as agents_working,
+                COUNT(DISTINCT shop_id) as shops_visited
+            FROM checkins 
+            WHERE DATE(timestamp) = %s
+            """
+            
+            date_data = self.execute_query(date_query, params=(date_str,))
+            
+            # Get top agents for that date
+            date_agents_query = """
+            SELECT 
+                u.name as agent_name,
+                COUNT(c.id) as checkins_count
+            FROM checkins c
+            JOIN users u ON c.agent_id = u.id
+            WHERE DATE(c.timestamp) = %s
+            GROUP BY c.agent_id, u.name
+            ORDER BY checkins_count DESC
+            LIMIT 5
+            """
+            
+            agents_data = self.execute_query(date_agents_query, params=(date_str,))
+            
+            return {
+                "specific_date_data": {
+                    "summary": {
+                        "total_checkins": date_data.iloc[0]['total_checkins'] if not date_data.empty else 0,
+                        "agents_working": date_data.iloc[0]['agents_working'] if not date_data.empty else 0,
+                        "shops_visited": date_data.iloc[0]['shops_visited'] if not date_data.empty else 0,
+                        "date": date_str
+                    },
+                    "top_agents": agents_data.to_dict('records') if not agents_data.empty else []
+                }
+            }
+                
+        except Exception as e:
+            print(f"Error getting data for date {date_str}: {e}")
+            return {"specific_date_data": {"error": str(e)}}
     
     def _generate_basic_answer(self, question: str, data: Dict[str, Any]) -> str:
         """Generate basic answer without AI"""
