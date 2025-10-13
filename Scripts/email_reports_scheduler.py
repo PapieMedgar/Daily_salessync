@@ -163,6 +163,8 @@ Reports included:
 - Team Lead Visits Report (CSV & Excel)  
 - Visit Details Export by Team Lead (CSV & Excel files)
 
+Recipients: {', '.join(self.recipients)}
+
 """
             
             if errors:

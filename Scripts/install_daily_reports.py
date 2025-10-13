@@ -57,6 +57,7 @@ def check_env_config():
         return False
     
     print("✓ .env file is properly configured")
+    print(f"  Recipients: {', '.join([email.strip() for email in os.getenv('EMAIL_RECIPIENTS', '').split(',') if email.strip()])}")
     return True
 
 def setup_cron():

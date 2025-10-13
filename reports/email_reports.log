@@ -1,0 +1,30 @@
+2025-10-13 14:09:24,918 - INFO - Email scheduler initialized for 3 recipients
+2025-10-13 14:09:24,918 - INFO - Starting daily reports generation and email sending
+2025-10-13 14:09:24,918 - INFO - Generating reports for 2025-10-12
+2025-10-13 14:09:24,918 - INFO - Running script: /usr/bin/python3 Scripts/daily_visits_report.py 2025-10-12 2025-10-12 reports/daily_visits_2025-10-12.csv
+2025-10-13 14:09:31,363 - INFO - Successfully ran daily_visits_report.py
+2025-10-13 14:09:31,363 - INFO - Output:  Excel file saved: reports/daily_visits_2025-10-12.xlsx
+
+ Wrote 0 rows to reports/daily_visits_2025-10-12.csv
+
+
+2025-10-13 14:09:31,363 - INFO - Running script: /usr/bin/python3 Scripts/team_lead_visits_report.py reports/daily_visits_2025-10-12.csv reports/team_lead_daily_visits_2025-10-12.csv
+2025-10-13 14:09:31,521 - INFO - Successfully ran team_lead_visits_report.py
+2025-10-13 14:09:31,521 - INFO - Output: Wrote team-lead CSV: reports/team_lead_daily_visits_2025-10-12.csv
+Wrote team-lead Excel: reports/team_lead_daily_visits_2025-10-12.xlsx
+
+2025-10-13 14:09:31,521 - INFO - Running script: /usr/bin/python3 Scripts/team_lead_visit_details_export.py 2025-10-12 2025-10-12 reports/visit_details_2025-10-12
+2025-10-13 14:09:39,240 - INFO - Successfully ran team_lead_visit_details_export.py
+2025-10-13 14:09:39,240 - INFO - Output: 
+Wrote files:
+reports/visit_details_2025-10-12/visit_details_moses-thulare-moshwane.csv
+reports/visit_details_2025-10-12/visit_details_moses-thulare-moshwane.xlsx
+reports/visit_details_2025-10-12/visit_details_nkosingiphile-ntombikayise-ntombi-khumalo.csv
+reports/visit_details_2025-10-12/visit_details_nkosingiphile-ntombikayise-ntombi-khumalo.xlsx
+reports/visit_details_2025-10-12/visit_details_ntombizodwa-zodwa-dubazana.csv
+reports/visit_details_2025-10-12/visit_details_ntombizodwa-zodwa-dubazana.xlsx
+reports/visit_details_2025-10-12/visit_details_gilda-katarina-mashele.csv
+reports/visit_details_2025-10-12/visit_details_gilda-katarina-mashele.xlsx
+
+2025-10-13 14:09:39,426 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 6a1803df08f44-87bc35b04dfsm71979076d6.56 - gsmtp')
+2025-10-13 14:09:39,427 - ERROR - Failed to send email with reports
