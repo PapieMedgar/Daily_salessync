@@ -27,16 +27,23 @@ from email.mime.base import MIMEBase
 from email import encoders
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Resolve project root and ensure log directory exists
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOG_DIR = PROJECT_ROOT / "reports"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "email_reports.log"
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('reports/email_reports.log'),
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
         logging.StreamHandler()
     ]
 )
@@ -45,8 +52,11 @@ logger = logging.getLogger(__name__)
 class EmailReportsScheduler:
     def __init__(self):
         load_dotenv()
-        self.reports_dir = "reports"
-        self.scripts_dir = "Scripts"
+        # Use absolute paths so execution works from any current directory
+        self.project_root = str(PROJECT_ROOT)
+        self.reports_dir = str(LOG_DIR)
+        Path(self.reports_dir).mkdir(parents=True, exist_ok=True)
+        self.scripts_dir = os.path.join(self.project_root, "Scripts")
         
         # Email configuration from environment variables
         self.smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
@@ -76,7 +86,7 @@ class EmailReportsScheduler:
                 cmd.extend(args)
             
             logger.info(f"Running script: {' '.join(cmd)}")
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.dirname(os.path.dirname(__file__)))
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.project_root)
             
             if result.returncode == 0:
                 logger.info(f"Successfully ran {script_name}")
