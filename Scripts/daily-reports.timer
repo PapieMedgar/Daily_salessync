@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Daily Email Reports at 4pm
+Requires=daily-reports.service
+
+[Timer]
+OnCalendar=daily
+AccuracySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

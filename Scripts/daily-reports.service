@@ -1,0 +1,15 @@
+[Unit]
+Description=Daily Email Reports Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/workspace
+Environment=PYTHONPATH=/workspace:/usr/bin/python3
+ExecStart=/usr/bin/python3 /workspace/Scripts/email_reports_scheduler.py
+StandardOutput=append:/workspace/reports/email_reports.log
+StandardError=append:/workspace/reports/email_reports.log
+
+[Install]
+WantedBy=multi-user.target
